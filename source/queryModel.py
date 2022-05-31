@@ -1,3 +1,4 @@
+from operator import index
 import os
 import heapq
 import requests
@@ -6,9 +7,18 @@ print("Initializing...")
 from tensorflow.keras.models import load_model
 print("Pulling latest trained models...")
 
+if not os.path.exists("./models"):
+    os.makedirs("./models")
 
-user = 'my_github_username'
-psw = ''
+index_file = requests.get("https://raw.githubusercontent.com/robertsj3app/mycoNet2/main/output/index.txt", allow_redirects=True)
+lines = index_file.text.strip().split('\n')
+
+for l in lines:
+    file = requests.get(f"https://github.com/robertsj3app/mycoNet2/raw/main/output/{l}", allow_redirects=True)
+    open(f"models/{l}", 'wb').write(file.content)
+    print(f"Found {l}...")
+
+os.system('cls' if os.name == 'nt' else 'clear')
 
 def select_model():
     files = []
@@ -56,7 +66,7 @@ def manual_query(model):
     plt = int(input("Enter number of plate days: "))
     qur = [inc, sed, plt]
     result = model.predict([qur])
-    print(f"Model predicts that {qur} will give a yield of {result}.")
+    print(f"Model predicts that {qur} will give a yield of {result}.\n")
     select_query_mode(model)
 
 def request_prediction(model, num):

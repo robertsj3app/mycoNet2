@@ -1,4 +1,4 @@
 *.csv
 *.xlsx
-pyinstaller/
-virtual-wine/
+models/
+data/
