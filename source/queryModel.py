@@ -20,6 +20,14 @@ for l in lines:
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
+def intInput(prompt):
+    inp = -1
+    try:
+        inp = int(input(prompt))
+    except ValueError:
+        inp = -1
+    return inp
+
 def select_model():
     files = []
     for file in os.listdir("./models"):
@@ -32,20 +40,19 @@ def select_model():
         i += 1
         print(f"{i}: {f}")
 
-    inp = int(input("> "))
-    model = 0
+    inp = intInput("> ")
     if inp <= i and inp > 0:
         file = files[inp-1]
         model = load_model(f"./models/{file}")
         print(f"Loading model {file}...\n")
         select_query_mode(model)
     else:
-        print("Bad selection")
+        print("Bad selection\n")
         select_model()
 
 def select_query_mode(model):
     print("Select query mode:\n1: Manual query\n2: Request best prediction\n3: Back")
-    inp = int(input("> "))
+    inp = intInput("> ")
     if inp == 1:
         manual_query(model)
     elif inp == 2:
@@ -57,13 +64,17 @@ def select_query_mode(model):
         select_query_mode(model)
 
 def get_num_queries(model):
-    num = int(input("Enter desired number of top predictions: "))
+    num = intInput("Enter desired number of top predictions: ")
     request_prediction(model, num)
 
 def manual_query(model):
-    inc = int(input("Enter number of incubation days: "))
-    sed = int(input("Enter number of seed days: "))
-    plt = int(input("Enter number of plate days: "))
+    inc = sed = plt = -1
+    while(inc < 12 or inc > 30):
+        inc = intInput("Enter number of incubation days (12 - 30): ")
+    while(sed < 6 or sed > 21):
+        sed = intInput("Enter number of seed days (6 - 21): ")
+    while(plt < 3 or plt > 17):
+        plt = intInput("Enter number of plate days (3 - 17): ")
     qur = [inc, sed, plt]
     result = model.predict([qur])
     print(f"Model predicts that {qur} will give a yield of {result}.\n")
