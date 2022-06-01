@@ -10,8 +10,8 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.models import load_model
 import os
 
-test = False
-whichMold ="my5"
+test = True
+whichMold ="my1"
 
 dataset = numpy.loadtxt(f"data/{whichMold}yielddata.csv", delimiter=',')
 X = dataset[:,1:4]
