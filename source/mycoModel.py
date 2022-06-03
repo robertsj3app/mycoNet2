@@ -11,9 +11,9 @@ from tensorflow.keras.models import load_model
 import os
 
 test = True
-whichMold ="my1"
+whichMold ="my5"
 
-dataset = numpy.loadtxt(f"data/{whichMold}yielddata.csv", delimiter=',')
+dataset = numpy.loadtxt(f"data/{whichMold}yielddata2010-current.csv", delimiter=',')
 X = dataset[:,1:4]
 y = dataset[:,4]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
@@ -34,7 +34,7 @@ model.compile(loss='mean_squared_error',
               optimizer=Adam(learning_rate=0.001))
 
 
-mc = ModelCheckpoint(f"output/{whichMold}_best_model.h5", monitor='val_loss', mode='min', save_best_only=True)
+mc = ModelCheckpoint(f"output/{whichMold}_best_model_revised_data.h5", monitor='val_loss', mode='min', save_best_only=True)
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=1000)
 
 history = model.fit(X_train, y_train, batch_size=64,
@@ -43,7 +43,7 @@ history = model.fit(X_train, y_train, batch_size=64,
           verbose=1,
           callbacks=[es, mc])
 
-best_model = load_model(f"output/{whichMold}_best_model.h5")
+best_model = load_model(f"output/{whichMold}_best_model_revised_data.h5")
 train_acc = best_model.evaluate(X_train, y_train, verbose=0)
 test_acc = best_model.evaluate(X_test, y_test, verbose=0)
 prediction = best_model.predict(X)
