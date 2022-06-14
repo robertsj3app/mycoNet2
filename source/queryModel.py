@@ -7,7 +7,6 @@ from tensorflow.keras.models import load_model
 import sklearn.gaussian_process
 import pickle
 print("Pulling latest trained models...")
-modelType = -1
 
 if not os.path.exists("./models"):
     os.makedirs("./models")
@@ -50,35 +49,34 @@ def select_model():
         else:
             modelType = "gauss"
 
-        model = ''
         if modelType == "neural":
             model = load_model(f"./models/{file}")
         else:
             model = pickle.load(open(f"./models/{file}", "rb"))
         print(f"Loading model {file}...\n")
-        select_query_mode(model)
+        select_query_mode(model, modelType)
     else:
         print("Bad selection\n")
         select_model()
 
-def select_query_mode(model):
+def select_query_mode(model, modelType):
     print("Select query mode:\n1: Manual query\n2: Request best prediction\n3: Back")
     inp = intInput("> ")
     if inp == 1:
-        manual_query(model)
+        manual_query(model, modelType)
     elif inp == 2:
-        get_num_queries(model)
+        get_num_queries(model, modelType)
     elif inp == 3:
         select_model()
     else:
         print("Bad selection\n")
-        select_query_mode(model)
+        select_query_mode(model, modelType)
 
-def get_num_queries(model):
+def get_num_queries(model, modelType):
     num = intInput("Enter desired number of top predictions: ")
-    request_prediction(model, num)
+    request_prediction(model, num, modelType)
 
-def manual_query(model):
+def manual_query(model, modelType):
     inc = sed = plt = -1
     while(inc < 12 or inc > 30):
         inc = intInput("Enter number of incubation days (12 - 30): ")
@@ -94,9 +92,9 @@ def manual_query(model):
     else:
         result, stdev = model.predict([qur], return_std=True)
         print(f"Model predicts that {qur} will give a yield of {result} with a standard deviation of +/- {stdev}.\n")
-    select_query_mode(model)
+    select_query_mode(model, modelType)
 
-def request_prediction(model, num):
+def request_prediction(model, num, modelType):
     inc = list(range(12,31)) # spec calls for as low as 7 days
     sed = list(range(6,22))
     plt = list(range(3,18)) #spec can go up to 21
@@ -104,6 +102,7 @@ def request_prediction(model, num):
     stdevs = []
     # best_pred = -1
     params = []
+    print(modelType)
     for i in inc:
         for s in sed:
             for p in plt:
@@ -133,7 +132,7 @@ def request_prediction(model, num):
         else:
             print(f"{params[n][0]}\t{params[n][1]}\t{params[n][2]}\t{preds[n][0]}\t{stdevs[n][0]}")
     # print(f"Network claims that {params} is best with a yield of {best_pred}\n")
-    select_query_mode(model)
+    select_query_mode(model, modelType)
     
     
 select_model()
