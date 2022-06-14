@@ -1,11 +1,13 @@
-from operator import index
 import os
 import heapq
 import requests
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 print("Initializing...")
 from tensorflow.keras.models import load_model
+import sklearn.gaussian_process
+import pickle
 print("Pulling latest trained models...")
+modelType = -1
 
 if not os.path.exists("./models"):
     os.makedirs("./models")
@@ -31,7 +33,7 @@ def intInput(prompt):
 def select_model():
     files = []
     for file in os.listdir("./models"):
-        if file.endswith(".h5"):
+        if file.endswith(".h5") or file.endswith(".dump"):
             files.append(file)
 
     print("Select a model to query:")
@@ -43,7 +45,16 @@ def select_model():
     inp = intInput("> ")
     if inp <= i and inp > 0:
         file = files[inp-1]
-        model = load_model(f"./models/{file}")
+        if file.endswith(".h5"):
+            modelType = "neural"
+        else:
+            modelType = "gauss"
+
+        model = ''
+        if modelType == "neural":
+            model = load_model(f"./models/{file}")
+        else:
+            model = pickle.load(open(f"./models/{file}", "rb"))
         print(f"Loading model {file}...\n")
         select_query_mode(model)
     else:
@@ -76,8 +87,13 @@ def manual_query(model):
     while(plt < 3 or plt > 17):
         plt = intInput("Enter number of plate days (3 - 17): ")
     qur = [inc, sed, plt]
-    result = model.predict([qur])
-    print(f"Model predicts that {qur} will give a yield of {result}.\n")
+
+    if modelType == "neural":
+        result = model.predict([qur])
+        print(f"Model predicts that {qur} will give a yield of {result}.\n")
+    else:
+        result, stdev = model.predict([qur], return_std=True)
+        print(f"Model predicts that {qur} will give a yield of {result} with a standard deviation of +/- {stdev}.\n")
     select_query_mode(model)
 
 def request_prediction(model, num):
@@ -85,6 +101,7 @@ def request_prediction(model, num):
     sed = list(range(6,22))
     plt = list(range(3,18)) #spec can go up to 21
     preds = []
+    stdevs = []
     # best_pred = -1
     params = []
     for i in inc:
@@ -92,7 +109,12 @@ def request_prediction(model, num):
             for p in plt:
                 thisparams = [i,s,p]
                 print(f"Trying {thisparams}...", end='\r', flush=True)
-                manual_prediction = model.predict([thisparams], verbose=False)
+                manual_prediction = ''
+                if modelType == "neural":
+                    manual_prediction = model.predict([thisparams])
+                else:
+                    manual_prediction, manual_stdev = model.predict([thisparams], return_std=True)
+                    stdevs.append(manual_stdev)
                 preds.append(manual_prediction)
                 params.append(thisparams)
                 # if(manual_prediction[0] > best_pred):
@@ -101,9 +123,15 @@ def request_prediction(model, num):
 
     n_largest_indices = heapq.nlargest(num, range(len(preds)), preds.__getitem__)
     print(f"\nTop {num} predictions:")
-    print("Inc\tSeed\tPlate\tYield")
+    if modelType == "neural":
+        print("Inc\tSeed\tPlate\tYield")
+    else:
+        print("Inc\tSeed\tPlate\tMean Yield\tStdev")
     for n in n_largest_indices:
-        print(f"{params[n][0]}\t{params[n][1]}\t{params[n][2]}\t{preds[n][0]}")
+        if modelType == "neural":
+            print(f"{params[n][0]}\t{params[n][1]}\t{params[n][2]}\t{preds[n][0]}")
+        else:
+            print(f"{params[n][0]}\t{params[n][1]}\t{params[n][2]}\t{preds[n][0]}\t{stdevs[n][0]}")
     # print(f"Network claims that {params} is best with a yield of {best_pred}\n")
     select_query_mode(model)
     
