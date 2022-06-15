@@ -11,3 +11,7 @@ my3_gauss.dump
 my5_gauss.dump
 my12_gauss.dump
 my19_gauss.dump
+my13_gauss.dump
+my15_gauss.dump
+my9_gauss.dump
+my45_gauss.dump

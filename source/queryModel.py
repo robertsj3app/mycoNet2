@@ -1,5 +1,6 @@
 import os
 import heapq
+from numpy import sort
 import requests
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 print("Initializing...")
@@ -36,6 +37,7 @@ def select_model():
 
     print("Select a model to query:")
     i = 0
+    files = sort(files)
     for f in files:
         i += 1
         print(f"{i}: {f}")
