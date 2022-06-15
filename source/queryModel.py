@@ -4,7 +4,6 @@ import requests
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 print("Initializing...")
 from tensorflow.keras.models import load_model
-import sklearn.gaussian_process
 import pickle
 print("Pulling latest trained models...")
 
@@ -102,7 +101,6 @@ def request_prediction(model, num, modelType):
     stdevs = []
     # best_pred = -1
     params = []
-    print(modelType)
     for i in inc:
         for s in sed:
             for p in plt:
@@ -125,12 +123,13 @@ def request_prediction(model, num, modelType):
     if modelType == "neural":
         print("Inc\tSeed\tPlate\tYield")
     else:
-        print("Inc\tSeed\tPlate\tMean Yield\tStdev")
+        print("Inc\tSeed\tPlate\tMean Yield\tStd. Dev")
     for n in n_largest_indices:
+        
         if modelType == "neural":
-            print(f"{params[n][0]}\t{params[n][1]}\t{params[n][2]}\t{preds[n][0]}")
+            print(f"{round(params[n][0],3)}\t{round(params[n][1],3)}\t{round(params[n][2],3)}\t{str(round(preds[n][0][0],3))}")
         else:
-            print(f"{params[n][0]}\t{params[n][1]}\t{params[n][2]}\t{preds[n][0]}\t{stdevs[n][0]}")
+            print(f"{round(params[n][0],3)}\t{round(params[n][1],3)}\t{round(params[n][2],3)}\t{round(preds[n][0],3)}\t\t{round(stdevs[n][0],3)}")
     # print(f"Network claims that {params} is best with a yield of {best_pred}\n")
     select_query_mode(model, modelType)
     

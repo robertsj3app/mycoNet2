@@ -1,4 +1,5 @@
 import pandas
 
-data = pandas.read_excel("./data/my5yielddata2010-current.xlsx")
-data.to_csv("./data/my5yielddata2010-current.csv")
+whichMold = "my45"
+data = pandas.read_excel(f"./data/{whichMold}yielddata.xlsx")
+data.to_csv(f"./data/{whichMold}yielddata.csv")
