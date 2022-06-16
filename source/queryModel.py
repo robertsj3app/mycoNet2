@@ -125,13 +125,13 @@ def request_prediction(model, num, modelType):
     if modelType == "neural":
         print("Inc\tSeed\tPlate\tYield")
     else:
-        print("Inc\tSeed\tPlate\tMean Yield\tStd. Dev")
+        print("Inc\tSeed\tPlate\tMean Yield\tStd. Dev\tRange")
     for n in n_largest_indices:
         
         if modelType == "neural":
             print(f"{round(params[n][0],3)}\t{round(params[n][1],3)}\t{round(params[n][2],3)}\t{str(round(preds[n][0][0],3))}")
         else:
-            print(f"{round(params[n][0],3)}\t{round(params[n][1],3)}\t{round(params[n][2],3)}\t{round(preds[n][0],3)}\t\t{round(stdevs[n][0],3)}")
+            print(f"{round(params[n][0],3)}\t{round(params[n][1],3)}\t{round(params[n][2],3)}\t{round(preds[n][0],3)}\t\t{round(stdevs[n][0],3)}\t\t{round(preds[n][0] - stdevs[n][0], 3)} - {round(preds[n][0] + stdevs[n][0],3)}")
     # print(f"Network claims that {params} is best with a yield of {best_pred}\n")
     select_query_mode(model, modelType)
     
