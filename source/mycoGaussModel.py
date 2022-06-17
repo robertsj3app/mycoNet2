@@ -4,7 +4,7 @@ from sklearn.gaussian_process.kernels import RBF, WhiteKernel, Matern
 import matplotlib.pyplot as plt
 import pickle
 
-whichMold ="my6"
+whichMold ="my17"
 removeDups = False
 dataset = np.loadtxt(f"data/{whichMold}yielddata.csv", delimiter=',')
 #all_days = dataset[:,3].tolist()
