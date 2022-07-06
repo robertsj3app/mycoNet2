@@ -3,6 +3,8 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel, Matern
 import matplotlib.pyplot as plt
 import pickle
+import pandas
+import mysql.connector
 
 whichMold ="my33"
 removeDups = False
