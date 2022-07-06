@@ -6,6 +6,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 print("Initializing...")
 from tensorflow.keras.models import load_model
 import pickle
+from flask import Flask
+
 print("Pulling latest trained models...")
 
 if not os.path.exists("./models"):
