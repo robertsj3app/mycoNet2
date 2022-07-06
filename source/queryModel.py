@@ -1,4 +1,3 @@
-from importlib.metadata import metadata
 import os
 import heapq
 from numpy import sort

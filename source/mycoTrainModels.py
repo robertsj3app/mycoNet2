@@ -1,6 +1,3 @@
-from importlib.metadata import metadata
-from shutil import which
-from tabnanny import check
 import numpy as np
 import mycologyHelpers as mH
 from sklearn.gaussian_process import GaussianProcessRegressor
