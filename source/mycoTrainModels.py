@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import mycologyHelpers as mH
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel
@@ -9,7 +10,7 @@ def dataChangedSinceLastTrain(whichMold):
     if not f"{whichMold}" in list(metadata.keys()):
         return True
     for k in list(metadata.keys()):
-        if k == f"{whichMold}" and metadata[k]["checksum"] != f"{checksum}":
+        if (k == f"{whichMold}" and (metadata[k]["checksum"] != f"{checksum}" or not os.path.exists(f"output/{metadata[k]['file']}"))):
             return True
     return False
 
