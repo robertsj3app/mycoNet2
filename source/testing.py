@@ -2,6 +2,21 @@ from msilib.schema import Error
 import numpy
 from mysql import connector
 from mysql.connector import errorcode
+import json
+
+# from json.decoder import JSONDecodeError
+
+# metadata = {}
+# with open('output/index.json','r+') as indexFile:
+#     try:
+#         metadata = json.load(indexFile)
+#     except JSONDecodeError:
+#         pass
+
+# metadata["mold2"] = "test3"
+
+# with open('output/index.json','w+') as indexFile:
+#     json.dump(metadata, indexFile, indent = 4)
 
 whichMold ="1"
 dataset = []
@@ -16,14 +31,15 @@ except connector.Error as err:
     else:
         print(err)
 else:
-    cursor = connection.cursor()
-    query = f"SELECT incubation_days, seed_days, plate_days, yield_per_liter FROM `mold_lots` WHERE mold_id = {whichMold} AND incubation_days > 0 AND seed_days > 0 AND plate_days > 0 AND discarded = 0 and facility = \"Lenoir\" ORDER BY `mold_lots`.`mfg_date` ASC;"
+    cursor = connection.cursor(dictionary=True)
+    query = f"SELECT SUM(CRC32(lot_id)) from mold_lots WHERE mold_id = {whichMold};"
     cursor.execute(query)
-
-    for (incubation_days, seed_days, plate_days, yield_per_liter) in cursor:
-        dataset.append([incubation_days, seed_days, plate_days, yield_per_liter])
+    result = cursor.fetchall()
+    checksum = 0
+    for d in result:
+        checksum = d["SUM(CRC32(lot_id))"]
 
     cursor.close()
     connection.close()
 
-print(numpy.array(dataset))
+print(checksum)
