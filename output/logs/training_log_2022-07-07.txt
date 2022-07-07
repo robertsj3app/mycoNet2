@@ -1,0 +1,65 @@
+Beginning training on 2022-07-07 at 11:45:11
+Beginning train for mold MY1... Success.
+Beginning train for mold MY2... Success.
+Beginning train for mold MY3... Success.
+Beginning train for mold MY4... Success.
+Beginning train for mold MY5... Success.
+Beginning train for mold MY6... Success.
+Beginning train for mold MY7... Success.
+Beginning train for mold MY8... Success.
+Beginning train for mold MY9... Success.
+Beginning train for mold MY10... Success.
+Beginning train for mold MY11... Success.
+Beginning train for mold MY12... Success.
+Beginning train for mold MY13... Success.
+Beginning train for mold MY14... Aborting, insufficient source data.
+Beginning train for mold MY15... Success.
+Beginning train for mold MY16... Success.
+Beginning train for mold MY17... Success.
+Beginning train for mold MY18... Success.
+Beginning train for mold MY19... Success.
+Beginning train for mold MY21... Success.
+Beginning train for mold MY22... Success.
+Beginning train for mold MY23... Success.
+Beginning train for mold MY24... Success.
+Beginning train for mold MY26... Success.
+Beginning train for mold MY27... Success.
+Beginning train for mold MY28... Success.
+Beginning train for mold MY29... Success.
+Beginning train for mold MY30... Success.
+Beginning train for mold MY31... Aborting, insufficient source data.
+Beginning train for mold MY33... Success.
+Beginning train for mold MY34... Success.
+Beginning train for mold MY35... Success.
+Beginning train for mold MY39... Success.
+Beginning train for mold MY40... Success.
+Beginning train for mold MY41... Success.
+Beginning train for mold MY42... Success.
+Beginning train for mold MY45... Success.
+Beginning train for mold MY48... Success.
+Beginning train for mold MY49... Success.
+Beginning train for mold MY50... Success.
+Beginning train for mold MY52... Success.
+Beginning train for mold MY53... Aborting, insufficient source data.
+Beginning train for mold MY56... Aborting, insufficient source data.
+Beginning train for mold MY63... Success.
+Beginning train for mold MY66... Aborting, insufficient source data.
+Beginning train for mold MY67... Success.
+Beginning train for mold MY68... Success.
+Beginning train for mold MY73... Aborting, insufficient source data.
+Beginning train for mold MY74... Aborting, insufficient source data.
+Beginning train for mold MY75... Aborting, insufficient source data.
+Beginning train for mold MY76... Aborting, insufficient source data.
+Beginning train for mold MY78... Aborting, insufficient source data.
+Beginning train for mold MY85... Aborting, insufficient source data.
+Beginning train for mold MY86... Aborting, insufficient source data.
+Beginning train for mold MY88... Success.
+Beginning train for mold MY90... Aborting, insufficient source data.
+Beginning train for mold MY94... Aborting, insufficient source data.
+Beginning train for mold MY96... Aborting, insufficient source data.
+Beginning train for mold MY101... Aborting, insufficient source data.
+Beginning train for mold MY102... Aborting, insufficient source data.
+Beginning train for mold MY103... Success.
+Beginning train for mold MY105... Aborting, insufficient source data.
+Beginning train for mold MY109... Aborting, insufficient source data.
+Beginning train for mold MY110... Aborting, insufficient source data.

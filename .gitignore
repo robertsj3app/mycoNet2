@@ -2,3 +2,4 @@
 *.xlsx
 models/
 data/
+output/

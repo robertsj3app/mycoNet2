@@ -3,11 +3,42 @@ from mysql.connector import errorcode
 import json
 from json.decoder import JSONDecodeError
 import pickle
+import os
+import sys
+from datetime import date, datetime
+
+outputDir = os.path.join(os.path.dirname(__file__), "../output")
+
+class Logger(object):
+    def __init__(self):
+        self.terminal = sys.stdout
+        if not os.path.exists(f"{outputDir}/logs/"):
+            os.makedirs(f"{outputDir}/logs")
+        self.log = open(f"{outputDir}/logs/training_log_{date.today()}.txt", "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message) 
+
+def toggleLog(bool):
+    if bool == True:
+        sys.stdout = Logger()
+    else:
+        sys.stdout = sys.__stdout__
+
+def getDateTime():
+    now = datetime.now()
+    time = now.strftime("%H:%M:%S")
+    date = now.date()
+    return f"{date} at {time}"
+
+def fileExistsInOutput(filename):
+    return os.path.exists(f"{outputDir}/{filename}")
 
 def readMetaData():
     metadata = {}
     try:
-        with open('output/index.json','r') as indexFile:
+        with open(f"{outputDir}/index.json",'r') as indexFile:
             try:
                 metadata = json.load(indexFile)
             except JSONDecodeError:
@@ -19,11 +50,11 @@ def readMetaData():
 def updateMetaData(filename, checksum, whichMold):
     metadata = readMetaData()
     metadata[f"{whichMold}"] = {"file" : filename, "checksum" : f"{checksum}"}
-    with open('output/index.json','w+') as indexFile:
+    with open(f"{outputDir}/index.json",'w+') as indexFile:
         json.dump(metadata, indexFile, indent = 4)
 
 def dumpTrainedModel(filename, model, whichMold, checksum):
-    with open(f"output/{filename}" , "wb") as f:
+    with open(f"{outputDir}/{filename}" , "wb") as f:
         pickle.dump(model, f) 
     updateMetaData(filename, checksum, whichMold)
 
