@@ -22,7 +22,7 @@ def dataChangedSinceLastTrain(whichMold):
     return False
 
 # Trains GP model for whichMold using given kernel params.
-def trainModel(whichMold, length_scale=[1.0, 1.0, 1.0], length_scale_bounds=(1.0, 2.6), n_restarts_optimizer=2000):
+def trainModel(whichMold, length_scale=[1.0, 1.0, 1.0], n_restarts_optimizer=2000):
     print(f"Beginning train for mold MY{whichMold}... ", end="", flush=True)
 
     # Only retrain if source data is different.
@@ -41,12 +41,13 @@ def trainModel(whichMold, length_scale=[1.0, 1.0, 1.0], length_scale_bounds=(1.0
         if(len(dataset) > N_MINIMUM_DATA_POINTS):
             all_days = np.asarray(dataset[:,0:3])
             yield_g = np.asarray(dataset[:,3])
+            length_scale_bounds = (1, 2 * np.average([np.std(all_days[0]), np.std(all_days[1]), np.std(all_days[2])]))
 
             kernel = 1 * RBF(length_scale=length_scale, length_scale_bounds=length_scale_bounds) + WhiteKernel()
             gaussian_process = GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=n_restarts_optimizer)
             gaussian_process.fit(all_days, yield_g)
-            gaussian_process.kernel_
-
+            print(f"Resulting kernel params: {gaussian_process.kernel_}")
+            
             # Dump trained model and update metadata
             mH.dumpTrainedModel(f"my{whichMold}_gauss.dump", gaussian_process, whichMold, mH.getChecksum(whichMold))
             print("Success.")
