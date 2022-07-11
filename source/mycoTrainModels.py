@@ -5,6 +5,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel
 import warnings
 
+
 N_MINIMUM_DATA_POINTS = 10
 
 # Compares checksum against stored metadata to determine if the model 

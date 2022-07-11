@@ -1,21 +1,26 @@
+# myclogyHelpers.py
+# A group of functions used to facilitiate interfacing with the mycology SQL database.
+# Author: Jeremy Roberts
+# Contact: Jeremy.Roberts@stallergenesgreer.com
+
 from mysql import connector
 from mysql.connector import errorcode
-import json
+from json import load, dump
 from json.decoder import JSONDecodeError
 import pickle
-import os
+from os import path, makedirs
 import sys
 from datetime import date, datetime
 
 # Define directory all outputs (index file and trained models) go to. Defined relative to location of script. 
-outputDir = os.path.join(os.path.dirname(__file__), "../output") 
+outputDir = path.join(path.dirname(__file__), "../output") 
 
 # Define logger class that dumps stdout to logfile based on date of instantiation as well as terminal.
 class Logger(object):
     def __init__(self):
         self.terminal = sys.stdout
-        if not os.path.exists(f"{outputDir}/logs/"):
-            os.makedirs(f"{outputDir}/logs")
+        if not path.exists(f"{outputDir}/logs/"):
+            makedirs(f"{outputDir}/logs")
         self.log = open(f"{outputDir}/logs/training_log_{date.today()}.txt", "a")
 
     def write(self, message):
@@ -43,7 +48,7 @@ def getDateTime():
 
 # Return true if filename exists in outputDir (defined at top)
 def fileExistsInOutput(filename):
-    return os.path.exists(f"{outputDir}/{filename}")
+    return path.exists(f"{outputDir}/{filename}")
 
 # Read outputDir/index.json into a dictionary
 def readMetaData():
@@ -51,7 +56,7 @@ def readMetaData():
     try:
         with open(f"{outputDir}/index.json",'r') as indexFile:
             try:
-                metadata = json.load(indexFile)
+                metadata = load(indexFile)
             except JSONDecodeError:
                 pass
     except FileNotFoundError:
@@ -66,7 +71,7 @@ def updateMetaData(filename, checksum, whichMold):
     metadata = readMetaData()
     metadata[f"{whichMold}"] = {"file" : filename, "checksum" : f"{checksum}"}
     with open(f"{outputDir}/index.json",'w+') as indexFile:
-        json.dump(metadata, indexFile, indent = 4)
+        dump(metadata, indexFile, indent = 4)
 
 # Pickles a trained model and dumps it to outputDir, then updates
 # the corresponding mold's metadata accordingly
