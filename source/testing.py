@@ -3,6 +3,7 @@ import numpy
 from mysql import connector
 from mysql.connector import errorcode
 import json
+import mycologyHelpers as mH
 
 # from json.decoder import JSONDecodeError
 
@@ -42,4 +43,4 @@ else:
     cursor.close()
     connection.close()
 
-print(checksum)
+print(mH.getSpec(1))

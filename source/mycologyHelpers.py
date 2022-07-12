@@ -2,7 +2,7 @@
 # A group of functions used to facilitiate interfacing with the mycology SQL database.
 # Author: Jeremy Roberts
 # Contact: Jeremy.Roberts@stallergenesgreer.com
-
+from shutil import which
 from mysql import connector
 from mysql.connector import errorcode
 from json import load, dump
@@ -73,19 +73,47 @@ def updateMetaData(filename, checksum, whichMold):
     with open(f"{outputDir}/index.json",'w+') as indexFile:
         dump(metadata, indexFile, indent = 4)
 
+# Returns a dictionary containing the requested spec limits for mold whichMold
+def getSpec(whichMold):
+    query = f"SELECT incubation_days_min, incubation_days_max, seed_days_min, seed_days_max, plate_days_min, plate_days_max FROM specs where spec_id = (SELECT spec_id from molds where mold_id = {whichMold});"
+    rawData = SQLQuery(query)
+    for d in rawData:
+        spec = d
+    return spec
+
+# Generates appropriate queries for a trained model and pushes its results to the gp_predictions table in the SQL database
+def pushModelResults(model, whichMold):
+    spec = getSpec(whichMold)
+    inc = list(range(spec["incubation_days_min"], spec["incubation_days_max"]))
+    sed = list(range(spec["seed_days_min"], spec["seed_days_max"]))
+    plt = list(range(spec["plate_days_min"], spec["plate_days_max"]))
+    query = f"DELETE FROM gp_predictions WHERE mold_id = {whichMold}"
+    SQLQuery(query)
+    print(f"Uploading results to database... ", end="", flush=True)
+    for i in inc:
+        for s in sed:
+            for p in plt:
+                thisparams = [i,s,p]
+                
+                predicted_yield, predicted_stdev = model.predict([thisparams], return_std=True)
+                query = f"INSERT INTO gp_predictions (mold_id, incubation_days, seed_days, plate_days, predicted_average_yield_per_liter, std_deviation) VALUES ({whichMold}, {i}, {s}, {p}, {predicted_yield[0]}, {predicted_stdev[0]})"
+                SQLQuery(query)
+    print("Success.")
+
 # Pickles a trained model and dumps it to outputDir, then updates
 # the corresponding mold's metadata accordingly
 def dumpTrainedModel(filename, model, whichMold, checksum):
     with open(f"{outputDir}/{filename}" , "wb") as f:
         pickle.dump(model, f) 
     updateMetaData(filename, checksum, whichMold)
+    pushModelResults(model, whichMold)
 
 # Returns a cursor object for use in querying the SQL database, and a connection object for
 # closing the connection once all queries are finished.
 def getSQLCursor(user, password):
     try:
         # Host and DB hardcoded, these should never change.
-        connection = connector.connect(user=user, password=password, host="localhost", database="mycology")
+        connection = connector.connect(user=user, password=password, host="localhost", database="mycology", autocommit=True)
 
     # Kill program on a connection error.
     except connector.Error as err:
