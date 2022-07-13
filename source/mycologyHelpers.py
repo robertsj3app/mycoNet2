@@ -2,19 +2,20 @@
 # A group of functions used to facilitiate interfacing with the mycology SQL database.
 # Author: Jeremy Roberts
 # Contact: Jeremy.Roberts@stallergenesgreer.com
-from shutil import which
+from string import hexdigits
 from mysql import connector
 from mysql.connector import errorcode
-from json import load, dump
+from json import load, dump, dumps
 from json.decoder import JSONDecodeError
 import pickle
 from os import path, makedirs
 import sys
 from datetime import date, datetime
+from zlib import crc32
 
 # Define directory all outputs (index file and trained models) go to. Defined relative to location of script. 
 outputDir = path.join(path.dirname(__file__), "../output") 
-
+configDir = path.join(path.dirname(__file__), "../config")
 # Define logger class that dumps stdout to logfile based on date of instantiation as well as terminal.
 class Logger(object):
     def __init__(self):
@@ -31,6 +32,16 @@ class Logger(object):
         self.terminal.flush()
         self.log.flush()
         pass
+
+def crc32Opt(fileName):
+    with open(fileName, 'rb') as fh:
+        hash = 0
+        while True:
+            s = fh.read(65536)
+            if not s:
+                break
+            hash = crc32(s, hash)
+        return "%08X" % (hash & 0xFFFFFFFF)
 
 # Toggle whether logging is active. Date of instantiating the logger is used until logging toggled off and on again.
 def toggleLog(bool):
@@ -51,26 +62,40 @@ def fileExistsInOutput(filename):
     return path.exists(f"{outputDir}/{filename}")
 
 # Read outputDir/index.json into a dictionary
-def readMetaData():
-    metadata = {}
+def readJSON(whichDir, filename):
+    dict = {}
+    if whichDir == "config":
+        dir = configDir
+    elif whichDir == "output":
+        dir = outputDir
+    else:
+        print ("Bad directory choice")
+        exit(1)
     try:
-        with open(f"{outputDir}/index.json",'r') as indexFile:
+        with open(f"{dir}/{filename}.json",'r') as file:
             try:
-                metadata = load(indexFile)
+                dict = load(file)
             except JSONDecodeError:
+                if(filename == "config"):
+                    print("Fatal Error: config.json is malformed and cannot be read!")
+                    exit(1)
                 pass
     except FileNotFoundError:
         pass
     
     # If file is corrupt or does not exist, silently return empty dictionary.
-    # All models will be retrained and a properly formatted index.json will be created.
-    return metadata
+    return dict
+
+def dumpConfig(config):
+    with open(f"{configDir}/config.json", "w") as configFile:
+        dump(config, configFile, indent = 4)
 
 # Updates metadata (filename of associated model and checksum) for mold number whichMold
-def updateMetaData(filename, checksum, whichMold):
-    metadata = readMetaData()
-    metadata[f"{whichMold}"] = {"file" : filename, "checksum" : f"{checksum}"}
-    with open(f"{outputDir}/index.json",'w+') as indexFile:
+def updateMetaData(filename, checksum, configChecksum, whichMold):
+    metadata = readJSON("config", "index")
+    metadata["environment_checksum"] = f"{getEnvChecksum()}"
+    metadata[f"{whichMold}"] = {"file" : filename, "data_checksum" : f"{checksum}", "config_checksum" : f"{configChecksum}"}
+    with open(f"{configDir}/index.json",'w+') as indexFile:
         dump(metadata, indexFile, indent = 4)
 
 # Returns a dictionary containing the requested spec limits for mold whichMold
@@ -102,10 +127,10 @@ def pushModelResults(model, whichMold):
 
 # Pickles a trained model and dumps it to outputDir, then updates
 # the corresponding mold's metadata accordingly
-def dumpTrainedModel(filename, model, whichMold, checksum):
+def dumpTrainedModel(filename, model, whichMold, checksum, configCheckum):
     with open(f"{outputDir}/{filename}" , "wb") as f:
         pickle.dump(model, f) 
-    updateMetaData(filename, checksum, whichMold)
+    updateMetaData(filename, checksum, configCheckum, whichMold)
     pushModelResults(model, whichMold)
 
 # Returns a cursor object for use in querying the SQL database, and a connection object for
@@ -141,6 +166,19 @@ def SQLQuery(query):
     # Result is returned as a list of dicts
     return result
 
+# Returns a configuration setting dictionary for mold number whichMold
+def getConfig(config, whichMold):
+    myConfig = config["default"]
+    if f"{whichMold}" in config.keys():
+        for f in config[f"{whichMold}"].keys():
+            myConfig[f] = config[f"{whichMold}"][f]
+    return myConfig
+
+# Returns CRC32 checksum of the configuration settings for mold whichMold.
+def getConfigChecksum(config, whichMold):
+    configStr = dumps(getConfig(config, whichMold))
+    return crc32(configStr.encode("utf-8"))
+
 # Returns CRC32 checksum of data corresponding to mold number whichMold.
 # Used to check if data has been updated to prevent needless retraining.
 def getChecksum(whichMold):
@@ -149,4 +187,12 @@ def getChecksum(whichMold):
     checksum = 0
     for d in rawData:
         checksum = d["SUM(CRC32(lot_id))"]
-    return checksum    
+    return checksum   
+
+# Returns CRC32 checksum of environment.
+# test change 
+def getEnvChecksum():
+    configFiles = ["venv/requirements.txt", "venv/pyvenv.cfg"]
+    sourceFiles = ["mycologyHelpers.py", "mycoTrainModels.py"]
+    checksum = sum([int(crc32Opt(f"{configDir}/{f}"), 16) for f in configFiles]) + sum([int(crc32Opt(f"{configDir}/../source/{f}"), 16) for f in sourceFiles])
+    return checksum

@@ -1,4 +1,3 @@
-from msilib.schema import Error
 import numpy
 from mysql import connector
 from mysql.connector import errorcode

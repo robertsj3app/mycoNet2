@@ -1,5 +1,6 @@
-*.csv
-*.xlsx
-models/
-data/
 output/
+config/venv/Lib
+config/venv/Scripts
+config/venv/Include
+pyvenv.cfg
+*.json
