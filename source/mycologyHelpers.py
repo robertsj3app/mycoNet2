@@ -2,7 +2,7 @@
 # A group of functions used to facilitiate interfacing with the mycology SQL database.
 # Author: Jeremy Roberts
 # Contact: Jeremy.Roberts@stallergenesgreer.com
-from string import hexdigits
+
 from mysql import connector
 from mysql.connector import errorcode
 from json import load, dump, dumps
@@ -13,10 +13,14 @@ import sys
 from datetime import date, datetime
 from zlib import crc32
 
-# Define directory all outputs (index file and trained models) go to. Defined relative to location of script. 
+# Define directories for output and configuration files. Defined relative to location of script. 
 outputDir = path.join(path.dirname(__file__), "../output") 
 configDir = path.join(path.dirname(__file__), "../config")
-# Define logger class that dumps stdout to logfile based on date of instantiation as well as terminal.
+
+# Variable to control whether logging is enabled or not
+logState = False
+
+# Define logger class that dumps stdout to logfile (named based on date of instantiation) as well as terminal.
 class Logger(object):
     def __init__(self):
         self.terminal = sys.stdout
@@ -33,6 +37,7 @@ class Logger(object):
         self.log.flush()
         pass
 
+# Optimized zlib.crc32 for checksumming files in chunks
 def crc32Opt(fileName):
     with open(fileName, 'rb') as fh:
         hash = 0
@@ -44,11 +49,14 @@ def crc32Opt(fileName):
         return "%08X" % (hash & 0xFFFFFFFF)
 
 # Toggle whether logging is active. Date of instantiating the logger is used until logging toggled off and on again.
-def toggleLog(bool):
-    if bool == True:
+def toggleLog():
+    global logState
+    if logState == False:
         sys.stdout = Logger()
+        logState = True
     else:
         sys.stdout = sys.__stdout__
+        logState = False
 
 # Return string showing current date and time
 def getDateTime():
@@ -69,15 +77,16 @@ def readJSON(whichDir, filename):
     elif whichDir == "output":
         dir = outputDir
     else:
-        print ("Bad directory choice")
+        print (f"Fatal Error: Directory {whichDir} does not exist.")
         exit(1)
     try:
         with open(f"{dir}/{filename}.json",'r') as file:
             try:
                 dict = load(file)
             except JSONDecodeError:
+                # Program won't work without config.json
                 if(filename == "config"):
-                    print("Fatal Error: config.json is malformed and cannot be read!")
+                    print("Fatal Error: config.json is malformed and cannot be read! Correct or delete file to restore functionality.")
                     exit(1)
                 pass
     except FileNotFoundError:
@@ -107,6 +116,7 @@ def getSpec(whichMold):
     return spec
 
 # Generates appropriate queries for a trained model and pushes its results to the gp_predictions table in the SQL database
+# TODO: Change this to grid search to allow for additional specified parameters
 def pushModelResults(model, whichMold):
     spec = getSpec(whichMold)
     inc = list(range(spec["incubation_days_min"], spec["incubation_days_max"]))
@@ -143,9 +153,9 @@ def getSQLCursor(user, password):
     # Kill program on a connection error.
     except connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong with your user name or password")
+            print("Fatal Error: Database access denied. Check your username and password.")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
+            print("Fatal Error: Database does not exist.")
         else:
             print(err)
         exit(0)
@@ -156,8 +166,10 @@ def getSQLCursor(user, password):
 
 # Creates a new connection to database, runs query, then terminates connection.
 def SQLQuery(query):
-    # Username and password hardcoded, these should never change.
-    (connection, cursor) = getSQLCursor("python", "gaussianProcess")
+    config = readJSON("config", "config")
+    username = config["credentials"]["username"]
+    password = config["credentials"]["password"]
+    (connection, cursor) = getSQLCursor(username, password)
     cursor.execute(query)
     result = cursor.fetchall()
     cursor.close()
@@ -165,6 +177,40 @@ def SQLQuery(query):
 
     # Result is returned as a list of dicts
     return result
+
+# Creates default configuration file if none exists.
+def initConfig():
+    defaultConfig = {
+        "credentials": {
+            "username" : "python",
+            "password" : "gaussianProcess"
+        },
+        "default": {
+            "n_restarts_optimizer" : 1000,
+            "n_minimum_data_points" : 10,
+            "additional_training_features" : [],
+            "conditionals" : ["facility != 'Willow Street'", "facility != 'Unknown'", "plug_type != 'Unknown'"]
+        },
+    }
+    existingConfig = readJSON("config", "config")
+    if existingConfig == {}:
+        print("No configuration file found. Generating default configuration file...")
+        dumpConfig(defaultConfig)
+    else:
+        if (not "credentials" in list(existingConfig.keys())
+        or not "username" in list(existingConfig["credentials"].keys())
+        or not "password" in list(existingConfig["credentials"].keys())):
+            print("Warning: Configuration missing credentials, fixing...")
+            existingConfig["credentials"] = defaultConfig["credentials"]
+        if (not "default" in list(existingConfig.keys()) 
+        or not "n_restarts_optimizer" in list(existingConfig["credentials"].keys())
+        or not "n_minimum_data_points" in list(existingConfig["credentials"].keys())
+        or not "additional_training_features" in list(existingConfig["credentials"].keys())
+        or not "conditionals" in list(existingConfig["credentials"].keys())):
+            print("Warning: Configuration missing default training behavior, fixing...")
+            existingConfig["default"] = defaultConfig["default"]
+        dumpConfig(existingConfig)
+
 
 # Returns a configuration setting dictionary for mold number whichMold
 def getConfig(config, whichMold):
