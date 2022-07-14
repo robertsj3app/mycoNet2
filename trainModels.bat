@@ -1,1 +1,1 @@
-python.exe "C:\query\mycoNet2\source\mycoTrainModels.py"
+python.exe "C:\query\mycoNet2\source\train.py"

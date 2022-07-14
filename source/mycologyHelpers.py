@@ -1,13 +1,10 @@
 # myclogyHelpers.py
-# A group of functions used to facilitiate interfacing with the mycology SQL database.
+# A group of miscellaneous functions to be used in other scripts.
 # Author: Jeremy Roberts
 # Contact: Jeremy.Roberts@stallergenesgreer.com
 
-from mysql import connector
-from mysql.connector import errorcode
 from json import load, dump, dumps
 from json.decoder import JSONDecodeError
-import pickle
 from os import path, makedirs
 import sys
 from datetime import date, datetime
@@ -37,6 +34,16 @@ class Logger(object):
         self.log.flush()
         pass
 
+# Toggle whether logging is active. Date of instantiating the logger is used until logging toggled off and on again.
+def toggleLog():
+    global logState
+    if logState == False:
+        sys.stdout = Logger()
+        logState = True
+    else:
+        sys.stdout = sys.__stdout__
+        logState = False
+
 # Optimized zlib.crc32 for checksumming files in chunks
 def crc32Opt(fileName):
     with open(fileName, 'rb') as fh:
@@ -48,16 +55,6 @@ def crc32Opt(fileName):
             hash = crc32(s, hash)
         return "%08X" % (hash & 0xFFFFFFFF)
 
-# Toggle whether logging is active. Date of instantiating the logger is used until logging toggled off and on again.
-def toggleLog():
-    global logState
-    if logState == False:
-        sys.stdout = Logger()
-        logState = True
-    else:
-        sys.stdout = sys.__stdout__
-        logState = False
-
 # Return string showing current date and time
 def getDateTime():
     now = datetime.now()
@@ -65,25 +62,15 @@ def getDateTime():
     date = now.date()
     return f"{date} at {time}"
 
-# Return true if filename exists in outputDir (defined at top)
-def fileExistsInOutput(filename):
-    return path.exists(f"{outputDir}/{filename}")
-
-# Read outputDir/index.json into a dictionary
+# Reads json file named filename.json in directory whichDir into a dictionary.
 def readJSON(whichDir, filename):
     dict = {}
-    if whichDir == "config":
-        dir = configDir
-    elif whichDir == "output":
-        dir = outputDir
-    else:
-        print (f"Fatal Error: Directory {whichDir} does not exist.")
-        exit(1)
     try:
-        with open(f"{dir}/{filename}.json",'r') as file:
+        with open(f"{whichDir}/{filename}.json",'r') as file:
             try:
                 dict = load(file)
             except JSONDecodeError:
+
                 # Program won't work without config.json
                 if(filename == "config"):
                     print("Fatal Error: config.json is malformed and cannot be read! Correct or delete file to restore functionality.")
@@ -95,90 +82,8 @@ def readJSON(whichDir, filename):
     # If file is corrupt or does not exist, silently return empty dictionary.
     return dict
 
-def dumpConfig(config):
-    with open(f"{configDir}/config.json", "w") as configFile:
-        dump(config, configFile, indent = 4)
-
-# Updates metadata (filename of associated model and checksum) for mold number whichMold
-def updateMetaData(filename, checksum, configChecksum, whichMold):
-    metadata = readJSON("config", "index")
-    metadata["environment_checksum"] = f"{getEnvChecksum()}"
-    metadata[f"{whichMold}"] = {"file" : filename, "data_checksum" : f"{checksum}", "config_checksum" : f"{configChecksum}"}
-    with open(f"{configDir}/index.json",'w+') as indexFile:
-        dump(metadata, indexFile, indent = 4)
-
-# Returns a dictionary containing the requested spec limits for mold whichMold
-def getSpec(whichMold):
-    query = f"SELECT incubation_days_min, incubation_days_max, seed_days_min, seed_days_max, plate_days_min, plate_days_max FROM specs where spec_id = (SELECT spec_id from molds where mold_id = {whichMold});"
-    rawData = SQLQuery(query)
-    for d in rawData:
-        spec = d
-    return spec
-
-# Generates appropriate queries for a trained model and pushes its results to the gp_predictions table in the SQL database
-# TODO: Change this to grid search to allow for additional specified parameters
-def pushModelResults(model, whichMold):
-    spec = getSpec(whichMold)
-    inc = list(range(spec["incubation_days_min"], spec["incubation_days_max"]))
-    sed = list(range(spec["seed_days_min"], spec["seed_days_max"]))
-    plt = list(range(spec["plate_days_min"], spec["plate_days_max"]))
-    query = f"DELETE FROM gp_predictions WHERE mold_id = {whichMold}"
-    SQLQuery(query)
-    print(f"Uploading results to database... ", end="", flush=True)
-    for i in inc:
-        for s in sed:
-            for p in plt:
-                thisparams = [i,s,p]
-                
-                predicted_yield, predicted_stdev = model.predict([thisparams], return_std=True)
-                query = f"INSERT INTO gp_predictions (mold_id, incubation_days, seed_days, plate_days, predicted_average_yield_per_liter, std_deviation) VALUES ({whichMold}, {i}, {s}, {p}, {predicted_yield[0]}, {predicted_stdev[0]})"
-                SQLQuery(query)
-    print("Success.")
-
-# Pickles a trained model and dumps it to outputDir, then updates
-# the corresponding mold's metadata accordingly
-def dumpTrainedModel(filename, model, whichMold, checksum, configCheckum):
-    with open(f"{outputDir}/{filename}" , "wb") as f:
-        pickle.dump(model, f) 
-    updateMetaData(filename, checksum, configCheckum, whichMold)
-    pushModelResults(model, whichMold)
-
-# Returns a cursor object for use in querying the SQL database, and a connection object for
-# closing the connection once all queries are finished.
-def getSQLCursor(user, password):
-    try:
-        # Host and DB hardcoded, these should never change.
-        connection = connector.connect(user=user, password=password, host="localhost", database="mycology", autocommit=True)
-
-    # Kill program on a connection error.
-    except connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Fatal Error: Database access denied. Check your username and password.")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Fatal Error: Database does not exist.")
-        else:
-            print(err)
-        exit(0)
-    else:
-        # Cursor will return list of dictionary objects when queried.
-        cursor = connection.cursor(dictionary=True)
-        return (connection, cursor)
-
-# Creates a new connection to database, runs query, then terminates connection.
-def SQLQuery(query):
-    config = readJSON("config", "config")
-    username = config["credentials"]["username"]
-    password = config["credentials"]["password"]
-    (connection, cursor) = getSQLCursor(username, password)
-    cursor.execute(query)
-    result = cursor.fetchall()
-    cursor.close()
-    connection.close()
-
-    # Result is returned as a list of dicts
-    return result
-
 # Creates default configuration file if none exists.
+# Fixes errors in configuration file.
 def initConfig():
     defaultConfig = {
         "credentials": {
@@ -186,7 +91,7 @@ def initConfig():
             "password" : "gaussianProcess"
         },
         "default": {
-            "n_restarts_optimizer" : 1000,
+            "n_restarts_optimizer" : 100,
             "n_minimum_data_points" : 10,
             "additional_training_features" : [],
             "conditionals" : ["facility != 'Willow Street'", "facility != 'Unknown'", "plug_type != 'Unknown'"]
@@ -203,42 +108,31 @@ def initConfig():
             print("Warning: Configuration missing credentials, fixing...")
             existingConfig["credentials"] = defaultConfig["credentials"]
         if (not "default" in list(existingConfig.keys()) 
-        or not "n_restarts_optimizer" in list(existingConfig["credentials"].keys())
-        or not "n_minimum_data_points" in list(existingConfig["credentials"].keys())
-        or not "additional_training_features" in list(existingConfig["credentials"].keys())
-        or not "conditionals" in list(existingConfig["credentials"].keys())):
+        or not "n_restarts_optimizer" in list(existingConfig["default"].keys())
+        or not "n_minimum_data_points" in list(existingConfig["default"].keys())
+        or not "additional_training_features" in list(existingConfig["default"].keys())
+        or not "conditionals" in list(existingConfig["default"].keys())):
             print("Warning: Configuration missing default training behavior, fixing...")
             existingConfig["default"] = defaultConfig["default"]
         dumpConfig(existingConfig)
 
+# Dumps dictionary config to config file.
+def dumpConfig(config):
+    with open(f"{configDir}/config.json", "w") as configFile:
+        dump(config, configFile, indent = 4)
 
-# Returns a configuration setting dictionary for mold number whichMold
-def getConfig(config, whichMold):
-    myConfig = config["default"]
-    if f"{whichMold}" in config.keys():
-        for f in config[f"{whichMold}"].keys():
-            myConfig[f] = config[f"{whichMold}"][f]
-    return myConfig
-
-# Returns CRC32 checksum of the configuration settings for mold whichMold.
-def getConfigChecksum(config, whichMold):
-    configStr = dumps(getConfig(config, whichMold))
-    return crc32(configStr.encode("utf-8"))
-
-# Returns CRC32 checksum of data corresponding to mold number whichMold.
-# Used to check if data has been updated to prevent needless retraining.
-def getChecksum(whichMold):
-    query = f"SELECT SUM(CRC32(lot_id)) from mold_lots WHERE mold_id = {whichMold};"
-    rawData = SQLQuery(query)
-    checksum = 0
-    for d in rawData:
-        checksum = d["SUM(CRC32(lot_id))"]
-    return checksum   
+# Returns CRC32 checksum of dictionary dict.
+def dictChecksum(dict):
+    return crc32(dumps(dict).encode("utf-8"))
 
 # Returns CRC32 checksum of environment.
-# test change 
-def getEnvChecksum():
+def envChecksum():
     configFiles = ["venv/requirements.txt", "venv/pyvenv.cfg"]
-    sourceFiles = ["mycologyHelpers.py", "mycoTrainModels.py"]
-    checksum = sum([int(crc32Opt(f"{configDir}/{f}"), 16) for f in configFiles]) + sum([int(crc32Opt(f"{configDir}/../source/{f}"), 16) for f in sourceFiles])
+    sourceFiles = ["GPFactory.py", "DBConnection.py", "mycologyHelpers.py"]
+    checksum = -1
+    try:
+        checksum = sum([int(crc32Opt(f"{configDir}/{f}"), 16) for f in configFiles]) + sum([int(crc32Opt(f"{configDir}/../source/{f}"), 16) for f in sourceFiles])
+    except FileNotFoundError:
+        print("Fatal Error: Files necessary for environment not found!")
+        exit(1)
     return checksum
