@@ -54,15 +54,20 @@ class GPFactory(object):
         self.__dumpTrainedModel(model, whichMold)
         self.__updateMetaData(whichMold)
         self.__pushModelResults(model, whichMold)
-        
-    # Generates appropriate queries for a trained model and pushes its results to the gp_predictions table in the SQL database
-    # TODO: Change this to grid search to allow for additional specified parameters
-    def __pushModelResults(self: Self, model: GaussianProcessRegressor, whichMold: int):
+
+    def __getSpec(self:Self, whichMold: int):
         spec = None
         query = f"SELECT incubation_days_min, incubation_days_max, seed_days_min, seed_days_max, plate_days_min, plate_days_max FROM specs where spec_id = (SELECT spec_id from molds where mold_id = {whichMold});"
         rawData = self.__db_connection.SQLQuery(query)
         for d in rawData:
             spec = d
+        return spec
+        
+    # Generates appropriate queries for a trained model and pushes its results to the gp_predictions table in the SQL database
+    # TODO: Change this to grid search to allow for additional specified parameters
+    def __pushModelResults(self: Self, model: GaussianProcessRegressor, whichMold: int):
+        
+        spec = self.__getSpec(whichMold)
 
         inc = list(range(spec["incubation_days_min"], spec["incubation_days_max"]))
         sed = list(range(spec["seed_days_min"], spec["seed_days_max"]))
@@ -149,6 +154,8 @@ class GPFactory(object):
                 dataset.append(list(d.values()))
 
             # Define expected behavior for area of curve outside of spec and convert to array.
+            spec = self.__getSpec(whichMold)
+            dataset[:] = [x for x in dataset if not x[0] > spec["incubation_days_max"] or x[1] > spec["seed_days_max"] or x[2] > spec["plate_days_max"]]
             dataset.append([0] * (numFeatures + 1))
             dataset = asarray(dataset)
 
@@ -159,10 +166,15 @@ class GPFactory(object):
 
                 # Length scale upper bound limited to prevent bad assumptions due to lack of knowledge of full mold growth curve.
                 # This limitation prevents oversmoothing of predicted function due to overestimated covariance.
-                # Formula allows bound to grow as the range of days in dataset grows.
-                length_scale_bound_upper = 2 * average([std(training_features[:,0]), std(training_features[:,1]), std(training_features[:,2])])
+                # Formula allows bound to grow as the range of data in dataset grows.
+                #length_scale_bound_upper = 2 * average([std(training_features[:,0]), std(training_features[:,1]), std(training_features[:,2])])
+                inc = list(range(spec["incubation_days_min"], spec["incubation_days_max"]))
+                sed = list(range(spec["seed_days_min"], spec["seed_days_max"]))
+                plt = list(range(spec["plate_days_min"], spec["plate_days_max"]))
+                length_scale_bound_upper = average([std(inc), std(sed), std(plt)])
                 length_scale = [1.0] * numFeatures
                 n_restarts_optimizer = myConfig["n_restarts_optimizer"]
+                print(myConfig)
 
                 # Build kernel and fit model on dataset
                 kernel = 1 * RBF(length_scale=length_scale, length_scale_bounds=(1, length_scale_bound_upper)) + WhiteKernel()

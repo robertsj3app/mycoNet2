@@ -8,6 +8,10 @@ from GPFactory import GPFactory
 from DBConnection import DBConnection
 from mycologyHelpers import getDateTime, toggleLog
 
+def trainOne(which):
+    fact = GPFactory()
+    fact.trainModel(which)
+
 def train():
 
     # Turn on logging.
@@ -27,4 +31,4 @@ def train():
         fact.trainModel(i)
     toggleLog()
 
-train()
+trainOne(4)
