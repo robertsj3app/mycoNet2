@@ -3,7 +3,6 @@
 # Author: Jeremy Roberts
 # Contact: Jeremy.Roberts@stallergenesgreer.com
 
-
 from GPFactory import GPFactory
 from DBConnection import DBConnection
 from mycologyHelpers import getDateTime, toggleLog
@@ -31,4 +30,4 @@ def train():
         fact.trainModel(i)
     toggleLog()
 
-trainOne(4)
+train()

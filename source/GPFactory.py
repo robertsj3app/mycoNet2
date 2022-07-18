@@ -5,7 +5,6 @@
 # Author: Jeremy Roberts
 # Contact: Jeremy.Roberts@stallergenesgreer.com
 
-
 from DBConnection import DBConnection
 from json import dump
 from mycologyHelpers import envChecksum, dictChecksum, initConfig, readJSON
@@ -17,7 +16,6 @@ from sklearn.gaussian_process.kernels import RBF, WhiteKernel
 from sklearn.exceptions import ConvergenceWarning
 from typing_extensions import Self
 from warnings import filterwarnings
-
 
 class GPFactory(object):
 
@@ -174,7 +172,6 @@ class GPFactory(object):
                 length_scale_bound_upper = average([std(inc), std(sed), std(plt)])
                 length_scale = [1.0] * numFeatures
                 n_restarts_optimizer = myConfig["n_restarts_optimizer"]
-                print(myConfig)
 
                 # Build kernel and fit model on dataset
                 kernel = 1 * RBF(length_scale=length_scale, length_scale_bounds=(1, length_scale_bound_upper)) + WhiteKernel()

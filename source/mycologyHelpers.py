@@ -21,7 +21,7 @@ logState = False
 class Logger(object):
     def __init__(self):
         self.terminal = sys.stdout
-        if not path.exists(f"{outputDir}/logs/"):
+        if not path.exists(f"{outputDir}/logs"):
             makedirs(f"{outputDir}/logs")
         self.log = open(f"{outputDir}/logs/training_log_{date.today()}.txt", "a")
 
@@ -97,7 +97,7 @@ def initConfig():
             "conditionals" : ["facility != 'Willow Street'", "facility != 'Unknown'", "plug_type != 'Unknown'"]
         },
     }
-    existingConfig = readJSON("config", "config")
+    existingConfig = readJSON(configDir, "config")
     if existingConfig == {}:
         print("No configuration file found. Generating default configuration file...")
         dumpConfig(defaultConfig)

@@ -1,3 +1,7 @@
+# DBConnection.py
+# Defines DBConnection class used to interfact with local MySQL database.
+# Author: Jeremy Roberts
+# Contact: Jeremy.Roberts@stallergenesgreer.com
 
 from mysql import connector
 from mysql.connector import errorcode
