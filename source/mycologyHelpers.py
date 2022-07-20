@@ -91,9 +91,8 @@ def initConfig():
             "password" : "gaussianProcess"
         },
         "default": {
-            "n_restarts_optimizer" : 100,
+            "n_restarts_optimizer" : 200,
             "n_minimum_data_points" : 10,
-            "additional_training_features" : [],
             "conditionals" : ["facility != 'Willow Street'", "facility != 'Unknown'", "plug_type != 'Unknown'"]
         },
     }
@@ -110,7 +109,6 @@ def initConfig():
         if (not "default" in list(existingConfig.keys()) 
         or not "n_restarts_optimizer" in list(existingConfig["default"].keys())
         or not "n_minimum_data_points" in list(existingConfig["default"].keys())
-        or not "additional_training_features" in list(existingConfig["default"].keys())
         or not "conditionals" in list(existingConfig["default"].keys())):
             print("Warning: Configuration missing default training behavior, fixing...")
             existingConfig["default"] = defaultConfig["default"]

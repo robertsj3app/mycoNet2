@@ -142,11 +142,10 @@ class GPFactory(object):
             myConfig = self.__extractConfig(whichMold)
 
             # Pull training features from config, build into query, push results to dataset.
-            features = ", ".join(myConfig["additional_training_features"]) + ", "
-            numFeatures = len(myConfig["additional_training_features"]) + 3
+            numFeatures = 3#len(myConfig["additional_training_features"]) + 3
             conditionals = " AND ".join(myConfig["conditionals"])
             numConditionals = len(myConfig["conditionals"])
-            query = f"SELECT incubation_days, seed_days, plate_days, {features if numFeatures > 3 else ''}yield_per_liter FROM `mold_lots` WHERE mold_id = {whichMold} AND incubation_days > 0 AND seed_days > 0 AND plate_days > 0 AND discarded = 0 {'AND ' + conditionals if numConditionals > 0 else ''} ORDER BY `mold_lots`.`mfg_date` ASC;" 
+            query = f"SELECT incubation_days, seed_days, plate_days, yield_per_liter FROM `mold_lots` WHERE mold_id = {whichMold} AND incubation_days > 0 AND seed_days > 0 AND plate_days > 0 AND discarded = 0 {'AND ' + conditionals if numConditionals > 0 else ''} ORDER BY `mold_lots`.`mfg_date` ASC;" 
             rawData = self.__db_connection.SQLQuery(query)
             for d in rawData:
                 dataset.append(list(d.values()))
