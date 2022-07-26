@@ -5,6 +5,7 @@
 # Author: Jeremy Roberts
 # Contact: Jeremy.Roberts@stallergenesgreer.com
 
+from tkinter import E
 from DBConnection import DBConnection
 from json import dump
 from mycologyHelpers import envChecksum, dictChecksum, initConfig, readJSON
@@ -79,8 +80,13 @@ class GPFactory(object):
                 for p in plt:
                     thisparams = [i,s,p]                
                     predicted_yield, predicted_stdev = model.predict([thisparams], return_std=True)
-                    query = f"INSERT INTO gp_predictions (mold_id, incubation_days, seed_days, plate_days, predicted_average_yield_per_liter, std_deviation) VALUES ({whichMold}, {i}, {s}, {p}, {predicted_yield[0]}, {predicted_stdev[0]})"
-                    self.__db_connection.SQLQuery(query)
+                    lotweeks = self.calculateLotWeeks(whichMold, i, predicted_yield[0])
+                    query = f"INSERT INTO gp_predictions (mold_id, incubation_days, seed_days, plate_days, predicted_average_yield_per_liter, std_deviation, `lot*weeks`) VALUES ({whichMold}, {i}, {s}, {p}, {predicted_yield[0]}, {predicted_stdev[0]}, {lotweeks})"
+                    try:
+                        self.__db_connection.SQLQuery(query)
+                    except Exception as e:
+                        print(e)
+
         print(f"Success.")
     
     # Updates index file entry for mold number whichMold.
@@ -110,6 +116,20 @@ class GPFactory(object):
             checksum = d["SUM(CRC32(lot_id))"]
         return checksum  
 
+    def calculateLotWeeks(self: Self, whichMold: int, incubationDays: int, predictedYield: int):
+        query = f"SELECT vessel_size_l from incubation_methods where method = (SELECT incubation_method from specs where spec_id = (SELECT spec_id from molds where mold_id = {whichMold}));"
+        rawData = self.__db_connection.SQLQuery(query)[0]
+        vesselSize = rawData["vessel_size_l"]
+        yieldPerVessel = predictedYield * vesselSize
+        query = f"SELECT annual_demand, num_vessels from molds where mold_id = {whichMold}"
+        rawData = self.__db_connection.SQLQuery(query)[0]
+        annualDemand = rawData["annual_demand"]
+        numVessels = rawData["num_vessels"]
+        lotweeks = (incubationDays * (annualDemand / (numVessels * 7))) / yieldPerVessel
+        if lotweeks <= 0 or lotweeks > 200:
+            lotweeks = 200
+        return lotweeks
+        
     # Compares checksums against stored metadata to determine if the model 
     # for whichMold needs to be retrained.
     def dataChangedSinceLastTrain(self: Self, whichMold: int):
