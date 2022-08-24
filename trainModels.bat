@@ -1,0 +1,1 @@
+python.exe "C:\query\mycoNet2\source\train.py"
