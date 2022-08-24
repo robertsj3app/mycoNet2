@@ -25,15 +25,15 @@
 
 [Source Directory](#source-directory)
 
-[mycologyHelpers.py](#mycologyhelpers.py)
+[mycologyHelpers.py](#mycologyhelperspy)
 
-[DBConnection.py](#dbconnection.py)
+[DBConnection.py](#dbconnectionpy)
 
-[GPFactory.py](#gpfactory.py)
+[GPFactory.py](#gpfactorypy)
 
-[train.py](#train.py)
+[train.py](#trainpy)
 
-[trainModels.bat](#trainmodels.bat)
+[trainModels.bat](#trainmodelsbat)
 
 [Output Directory](#output-directory)
 
@@ -43,11 +43,11 @@
 
 [Config Directory](#config-directory)
 
-[index.json](#index.json)
+[index.json](#indexjson)
 
-[config.json](#config.json)
+[config.json](#configjson)
 
-[Appendix A: mycologyHelpers.py](#appendix-a-mycologyhelpers.py)
+[Appendix A: mycologyHelpers.py](#appendix-a-mycologyhelperspy)
 
 [Variables](#variables)
 
@@ -77,7 +77,7 @@
 
 [envChecksum()](#envchecksum)
 
-[Appendix B: DBConnection.py](#appendix-b-dbconnection.py)
+[Appendix B: DBConnection.py](#appendix-b-dbconnectionpy)
 
 [DBConnection](#dbconnection)
 
@@ -85,7 +85,7 @@
 
 [SQLQuery(self: Self, query: str)](#sqlqueryself-self-query-str)
 
-[Appendix C: GPFactory.py](#appendix-c-gpfactory.py)
+[Appendix C: GPFactory.py](#appendix-c-gpfactorypy)
 
 [GPFactory](#gpfactory)
 
@@ -110,7 +110,7 @@ whichMold: int)](#dumptrainedmodelself-self-model-gaussianprocessregressor-which
 
 [trainModel(self: Self, whichMold: int)](#trainmodelself-self-whichmold-int)
 
-[Appendix D: train.py](#appendix-d-train.py)
+[Appendix D: train.py](#appendix-d-trainpy)
 
 [Functions & Classes](#functions-classes-1)
 
@@ -338,7 +338,7 @@ formatting date/time strings. It also enforces and expects the directory
 structure listed above. This code exists purely to be imported into
 other scripts, so it should not be modified to execute any code. A
 description of functions and variables included in this file can be
-found in [Appendix A.](#appendix-a-mycologyhelpers.py)
+found in [Appendix A.](#appendix-a-mycologyhelperspy)
 
 ### DBConnection.py
 
@@ -347,7 +347,7 @@ connection to the SQL database and processes queries through the stored
 connection. This code exists purely to be imported into other scripts,
 so it should not be modified to execute any code. A description of
 functions and variables included in this file can be found in [Appendix
-B.](#appendix-b-dbconnection.py)
+B.](#appendix-b-dbconnectionpy)
 
 ### GPFactory.py
 
@@ -357,7 +357,7 @@ necessary behavior for communicating with the MySQL database and
 training the GaussianProcessRegressor models. This code exists purely to
 be imported into other scripts, so it should not be modified to execute
 any code. A description of functions and variables included in this file
-can be found in [Appendix C.](#appendix-c-gpfactory.py)
+can be found in [Appendix C.](#appendix-c-gpfactorypy)
 
 ### train.py
 
@@ -366,7 +366,7 @@ training of GaussianProcessRegressor models. It is also the file which
 is executed by trainModels.bat. The executable portion of this file
 contains a single function call to [train()](#train). A description of
 functions and variables included in this file can be found in [Appendix
-D.](#appendix-d-train.py)
+D.](#appendix-d-trainpy)
 
 ### trainModels.bat
 
