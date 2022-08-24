@@ -1,0 +1,25 @@
+{
+    "credentials": {
+        "username": "python",
+        "password": "gaussianProcess"
+    },
+    "default": {
+        "n_restarts_optimizer": 200,
+        "n_minimum_data_points": 10,
+        "conditionals": [
+            "facility != 'Willow Street'",
+            "facility != 'Unknown'",
+            "plug_type != 'Unknown'"
+        ]
+    },
+    "40": {
+        "conditionals": [
+            "facility != 'Willow Street'"
+        ]
+    },
+    "103": {
+        "conditionals": [
+            "facility != 'Willow Street'"
+        ]
+    }
+}

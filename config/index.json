@@ -1,0 +1,213 @@
+{
+    "environment_checksum": "11957753246",
+    "1": {
+        "file": "my1_gauss.dump",
+        "data_checksum": "788477782384",
+        "config_checksum": "2899418347"
+    },
+    "2": {
+        "file": "my2_gauss.dump",
+        "data_checksum": "127821827362",
+        "config_checksum": "2899418347"
+    },
+    "3": {
+        "file": "my3_gauss.dump",
+        "data_checksum": "613470525593",
+        "config_checksum": "2899418347"
+    },
+    "4": {
+        "file": "my4_gauss.dump",
+        "data_checksum": "223300814535",
+        "config_checksum": "2899418347"
+    },
+    "5": {
+        "file": "my5_gauss.dump",
+        "data_checksum": "663784538947",
+        "config_checksum": "2899418347"
+    },
+    "6": {
+        "file": "my6_gauss.dump",
+        "data_checksum": "211668797296",
+        "config_checksum": "2899418347"
+    },
+    "7": {
+        "file": "my7_gauss.dump",
+        "data_checksum": "49661416661",
+        "config_checksum": "2899418347"
+    },
+    "8": {
+        "file": "my8_gauss.dump",
+        "data_checksum": "142387081996",
+        "config_checksum": "2899418347"
+    },
+    "9": {
+        "file": "my9_gauss.dump",
+        "data_checksum": "153720006107",
+        "config_checksum": "2899418347"
+    },
+    "11": {
+        "file": "my11_gauss.dump",
+        "data_checksum": "410186152540",
+        "config_checksum": "2899418347"
+    },
+    "12": {
+        "file": "my12_gauss.dump",
+        "data_checksum": "703473634777",
+        "config_checksum": "2899418347"
+    },
+    "13": {
+        "file": "my13_gauss.dump",
+        "data_checksum": "249744378251",
+        "config_checksum": "2899418347"
+    },
+    "15": {
+        "file": "my15_gauss.dump",
+        "data_checksum": "418150847589",
+        "config_checksum": "2899418347"
+    },
+    "16": {
+        "file": "my16_gauss.dump",
+        "data_checksum": "217105715363",
+        "config_checksum": "2899418347"
+    },
+    "17": {
+        "file": "my17_gauss.dump",
+        "data_checksum": "64918377031",
+        "config_checksum": "2899418347"
+    },
+    "18": {
+        "file": "my18_gauss.dump",
+        "data_checksum": "120877315677",
+        "config_checksum": "2899418347"
+    },
+    "19": {
+        "file": "my19_gauss.dump",
+        "data_checksum": "587382534185",
+        "config_checksum": "2899418347"
+    },
+    "21": {
+        "file": "my21_gauss.dump",
+        "data_checksum": "245997215576",
+        "config_checksum": "2899418347"
+    },
+    "22": {
+        "file": "my22_gauss.dump",
+        "data_checksum": "57085751425",
+        "config_checksum": "2899418347"
+    },
+    "23": {
+        "file": "my23_gauss.dump",
+        "data_checksum": "169895144832",
+        "config_checksum": "2899418347"
+    },
+    "24": {
+        "file": "my24_gauss.dump",
+        "data_checksum": "68768716892",
+        "config_checksum": "2899418347"
+    },
+    "26": {
+        "file": "my26_gauss.dump",
+        "data_checksum": "53892720885",
+        "config_checksum": "2899418347"
+    },
+    "27": {
+        "file": "my27_gauss.dump",
+        "data_checksum": "445457615387",
+        "config_checksum": "2899418347"
+    },
+    "28": {
+        "file": "my28_gauss.dump",
+        "data_checksum": "114465233005",
+        "config_checksum": "2899418347"
+    },
+    "29": {
+        "file": "my29_gauss.dump",
+        "data_checksum": "146902940939",
+        "config_checksum": "2899418347"
+    },
+    "30": {
+        "file": "my30_gauss.dump",
+        "data_checksum": "53307429786",
+        "config_checksum": "2899418347"
+    },
+    "33": {
+        "file": "my33_gauss.dump",
+        "data_checksum": "97044302827",
+        "config_checksum": "2899418347"
+    },
+    "34": {
+        "file": "my34_gauss.dump",
+        "data_checksum": "35395316188",
+        "config_checksum": "2899418347"
+    },
+    "35": {
+        "file": "my35_gauss.dump",
+        "data_checksum": "50045717711",
+        "config_checksum": "2899418347"
+    },
+    "39": {
+        "file": "my39_gauss.dump",
+        "data_checksum": "242630606592",
+        "config_checksum": "2899418347"
+    },
+    "41": {
+        "file": "my41_gauss.dump",
+        "data_checksum": "43822418705",
+        "config_checksum": "2899418347"
+    },
+    "42": {
+        "file": "my42_gauss.dump",
+        "data_checksum": "42963748421",
+        "config_checksum": "2899418347"
+    },
+    "45": {
+        "file": "my45_gauss.dump",
+        "data_checksum": "132143750698",
+        "config_checksum": "2899418347"
+    },
+    "48": {
+        "file": "my48_gauss.dump",
+        "data_checksum": "87606371837",
+        "config_checksum": "2899418347"
+    },
+    "49": {
+        "file": "my49_gauss.dump",
+        "data_checksum": "93999235539",
+        "config_checksum": "2899418347"
+    },
+    "50": {
+        "file": "my50_gauss.dump",
+        "data_checksum": "91277201187",
+        "config_checksum": "2899418347"
+    },
+    "52": {
+        "file": "my52_gauss.dump",
+        "data_checksum": "45756052093",
+        "config_checksum": "2899418347"
+    },
+    "63": {
+        "file": "my63_gauss.dump",
+        "data_checksum": "213680577368",
+        "config_checksum": "2899418347"
+    },
+    "67": {
+        "file": "my67_gauss.dump",
+        "data_checksum": "149157691147",
+        "config_checksum": "2899418347"
+    },
+    "68": {
+        "file": "my68_gauss.dump",
+        "data_checksum": "480466432090",
+        "config_checksum": "2899418347"
+    },
+    "40": {
+        "file": "my40_gauss.dump",
+        "data_checksum": "181575981427",
+        "config_checksum": "58421511"
+    },
+    "103": {
+        "file": "my103_gauss.dump",
+        "data_checksum": "97359472258",
+        "config_checksum": "58421511"
+    }
+}

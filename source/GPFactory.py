@@ -5,7 +5,6 @@
 # Author: Jeremy Roberts
 # Contact: Jeremy.Roberts@stallergenesgreer.com
 
-from tkinter import E
 from DBConnection import DBConnection
 from json import dump
 from mycologyHelpers import envChecksum, dictChecksum, initConfig, readJSON
@@ -63,7 +62,6 @@ class GPFactory(object):
         return spec
         
     # Generates appropriate queries for a trained model and pushes its results to the gp_predictions table in the SQL database
-    # TODO: Change this to grid search to allow for additional specified parameters
     def __pushModelResults(self: Self, model: GaussianProcessRegressor, whichMold: int):
         
         spec = self.__getSpec(whichMold)
@@ -116,6 +114,14 @@ class GPFactory(object):
             checksum = d["SUM(CRC32(lot_id))"]
         return checksum  
 
+    # Calculates lot*weeks performance metric for a given mold entry.
+    # Used to determine optimal growth by factoring in time constraints and annual demand.
+    # Must be calculated through code since MySQL does not allow for generated columns using data from several tables.
+    # Formula:
+    # X = yield/vessel
+    # Y = growth days
+    # K = Annual Demand / (# Vessels * 7) = Arbitrary constant
+    # Lot*Weeks = Y*K/X
     def calculateLotWeeks(self: Self, whichMold: int, incubationDays: int, predictedYield: int):
         query = f"SELECT vessel_size_l from incubation_methods where method = (SELECT incubation_method from specs where spec_id = (SELECT spec_id from molds where mold_id = {whichMold}));"
         rawData = self.__db_connection.SQLQuery(query)[0]
@@ -162,7 +168,7 @@ class GPFactory(object):
             myConfig = self.__extractConfig(whichMold)
 
             # Pull training features from config, build into query, push results to dataset.
-            numFeatures = 3#len(myConfig["additional_training_features"]) + 3
+            numFeatures = 3
             conditionals = " AND ".join(myConfig["conditionals"])
             numConditionals = len(myConfig["conditionals"])
             query = f"SELECT incubation_days, seed_days, plate_days, yield_per_liter FROM `mold_lots` WHERE mold_id = {whichMold} AND incubation_days > 0 AND seed_days > 0 AND plate_days > 0 AND discarded = 0 {'AND ' + conditionals if numConditionals > 0 else ''} ORDER BY `mold_lots`.`mfg_date` ASC;" 
