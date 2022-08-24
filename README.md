@@ -658,9 +658,6 @@ formula is:
 
   - Lot\*Weeks = Y\*K/X
 
-Contact Kevin Enck (<Kevin.Enck@stallergenesgreer.com>) for questions
-regarding this formula and its uses.
-
 ##### dataChangedSinceLastTrain(self: Self, whichMold: int)
 
 Calculates the checksums for the mold lot data corresponding to
