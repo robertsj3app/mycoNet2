@@ -11,7 +11,7 @@
 
 [Scheduled Tasks](#scheduled-tasks)
 
-[Python 3.10.5](#python-3.10.5)
+[Python 3.10.5](#python-3105)
 
 [PHP 8](#php-8)
 
@@ -19,7 +19,7 @@
 
 [phpMyAdmin](#phpmyadmin)
 
-[MySQL Server 8.0](#mysql-server-8.0)
+[MySQL Server 8.0](#mysql-server-80)
 
 [mycoNet2 Code](#myconet2-code)
 
